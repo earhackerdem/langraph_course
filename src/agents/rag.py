@@ -17,8 +17,12 @@ llm = llm.bind_tools([file_search_tool])
 class State(MessagesState):
     customer_name: str
     my_age: int
+    
+    
+def extractor(state: State):
+    return {}
 
-def node_1(state: State):
+def conversation_node(state: State):
     new_state: State = {}
     if state.get("customer_name") is None:
         new_state["customer_name"] = "John Doe"
@@ -40,8 +44,16 @@ def node_1(state: State):
     new_state["messages"] = [ai_message]
     # Al devolver el nuevo state, se actualiza la memoria del agente
     return new_state
+
+
 builder = StateGraph(State)
-builder.add_node("node_1",node_1)
-builder.add_edge(START,'node_1')
-builder.add_edge('node_1',END)
+builder.add_node("conversation_node",conversation_node)
+builder.add_node("extractor_node",extractor)
+
+
+builder.add_edge(START,'extractor_node')
+builder.add_edge('extractor_node','conversation_node')
+builder.add_edge('conversation_node',END)
+
+
 agent = builder.compile()
