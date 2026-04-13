@@ -22,8 +22,13 @@ class Message(BaseModel):
 
 @app.post("/chat/{chat_id}")
 async def chat(chat_id: str, item: Message):
+    config = {
+        'configurable':{
+            'thread_id': chat_id
+        }
+    }
     human_message = HumanMessage(content=item.message)
-    response = agent.invoke({"messages":[human_message]})
+    response = agent.invoke({"messages":[human_message]},config)
     last_message = response['messages'][-1]
     return last_message.text
 
