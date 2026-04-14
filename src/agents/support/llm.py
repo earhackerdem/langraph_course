@@ -17,13 +17,16 @@ def _openai_model_id(tier: Tier) -> str:
     return os.getenv("OPENAI_CHAT_MODEL", "gpt-4o").strip()
 
 
+_DEFAULT_OLLAMA_MODEL = "gpt-oss:20b"
+
+
 def _ollama_model_id(tier: Tier) -> str:
     if tier == "mini":
         return (
             os.getenv("OLLAMA_MINI_MODEL", "").strip()
-            or os.getenv("OLLAMA_MODEL", "llama3.1").strip()
+            or os.getenv("OLLAMA_MODEL", _DEFAULT_OLLAMA_MODEL).strip()
         )
-    return os.getenv("OLLAMA_MODEL", "llama3.1").strip()
+    return os.getenv("OLLAMA_MODEL", _DEFAULT_OLLAMA_MODEL).strip()
 
 
 def get_chat_model(*, temperature: float = 0, tier: Tier = "full") -> BaseChatModel:
