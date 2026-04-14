@@ -2,6 +2,7 @@ from langchain.chat_models import init_chat_model
 from agents.support.state import State
 from agents.support.nodes.conversation.prompt import SYSTEM_PROMPT
 from agents.support.nodes.conversation.tools import tools
+from langchain.messages import AIMessage
 
 
 
@@ -22,6 +23,7 @@ def conversation_node(state: State):
             text_content += block
     # Reemplazamos el contenido complejo con el texto plano
     ai_message.content = text_content
+    ai_message = AIMessage(content=ai_message.text)
 
     new_state["messages"] = [ai_message]
     # Al devolver el nuevo state, se actualiza la memoria del agente
