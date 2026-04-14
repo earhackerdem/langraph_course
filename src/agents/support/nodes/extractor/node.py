@@ -1,6 +1,6 @@
-
-from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
+
+from agents.support.llm import get_chat_model
 from agents.support.nodes.extractor.prompt import SYSTEM_PROMPT
 from agents.support.state import State
 
@@ -11,7 +11,9 @@ class ContactInfo(BaseModel):
     phone: str = Field(description="The phone number of the person")
     age: int = Field(description="The age of the person")
 
-llm = ChatOpenAI(model='gpt-4o', temperature=0).with_structured_output(schema=ContactInfo)
+llm = get_chat_model(temperature=0, tier="full").with_structured_output(
+    schema=ContactInfo
+)
 
 def extractor(state: State):
     history = state["messages"]

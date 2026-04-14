@@ -1,9 +1,9 @@
 from agents.support.routes.intent.prompt import SYSTEM_PROMPT
 from pydantic import BaseModel, Field
-from typing import Literal 
-from langchain.chat_models import init_chat_model
+from typing import Literal
+
+from agents.support.llm import get_chat_model
 from agents.support.state import State
-import random
 
 
 class RouteIntent(BaseModel):
@@ -12,7 +12,7 @@ class RouteIntent(BaseModel):
         None, description="The next step in the routing process"
     )
 
-llm = init_chat_model("openai:gpt-4o",temperature=0)
+llm = get_chat_model(temperature=0, tier="full")
 llm = llm.with_structured_output(schema=RouteIntent)
 
 def intent_route(state: State) -> Literal["conversation_node","booking"]:
@@ -23,4 +23,4 @@ def intent_route(state: State) -> Literal["conversation_node","booking"]:
     schema = llm.invoke([("system",SYSTEM_PROMPT)] + history)
     if schema.step is not None:
         return schema.step
-    return 'conversation'
+    return "conversation_node"

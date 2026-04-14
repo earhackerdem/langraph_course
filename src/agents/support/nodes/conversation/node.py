@@ -1,13 +1,11 @@
-from langchain.chat_models import init_chat_model
+from agents.support.llm import get_chat_model, is_ollama_backend
 from agents.support.state import State
 from agents.support.nodes.conversation.prompt import SYSTEM_PROMPT
 from agents.support.nodes.conversation.tools import tools
 from langchain.messages import AIMessage
 
-
-
-llm = init_chat_model("openai:gpt-4o",temperature=0)
-llm = llm.bind_tools(tools)
+_base_llm = get_chat_model(temperature=0, tier="full")
+llm = _base_llm if is_ollama_backend() else _base_llm.bind_tools(tools)
 
 def conversation_node(state: State):
     new_state: State = {}
@@ -15,12 +13,16 @@ def conversation_node(state: State):
     last_message = history[-1].text
     customer_name = state.get('customer_name', 'John Doe')
     ai_message = llm.invoke([("system",SYSTEM_PROMPT.format(customer_name=customer_name)),("user",last_message)])
-    text_content = ""
-    for block in ai_message.content:
-        if isinstance(block, dict) and "text" in block:
-            text_content += block["text"]
-        elif isinstance(block, str):
-            text_content += block
+    raw = ai_message.content
+    if isinstance(raw, str):
+        text_content = raw
+    else:
+        text_content = ""
+        for block in raw:
+            if isinstance(block, dict) and "text" in block:
+                text_content += block["text"]
+            elif isinstance(block, str):
+                text_content += block
     # Reemplazamos el contenido complejo con el texto plano
     ai_message.content = text_content
     ai_message = AIMessage(content=ai_message.text)
